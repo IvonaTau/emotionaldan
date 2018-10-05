@@ -2,6 +2,8 @@
 # C extensions
 *.so
 
+__pycache__
+
 # Data
 data
 logs
