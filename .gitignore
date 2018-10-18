@@ -10,6 +10,8 @@ logs
 Model*
 logging.txt
 Test-trained-model.ipynb
+models_new.py
+train-old.py
 
 # Distribution / packaging
 .Python
