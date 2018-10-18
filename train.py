@@ -1,3 +1,8 @@
+"""
+!python3.6 train.py "/home/workspace/itautkute/emoDAN-tensorflow/" --trainSetFile="AffectnetVal_7.npz" 2
+!CUDA_VISIBLE_DEVICES=1 python3.6 train.py "/home/workspace/itautkute/emotionaldan/data/"   2
+"""
+
 import argparse
 import numpy as np
 import tensorflow as tf
