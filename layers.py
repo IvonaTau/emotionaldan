@@ -1,4 +1,4 @@
-#### Courtesy of https://github.com/mariolew/Deep-Alignment-Network-tensorflow
+# Courtesy of https://github.com/mariolew/Deep-Alignment-Network-tensorflow
 
 import tensorflow as tf
 import numpy as np
@@ -7,8 +7,8 @@ import itertools
 IMGSIZE = 224
 N_LANDMARK = 68
 
-Pixels = tf.constant(np.array([(x, y) for x in range(IMGSIZE) for y in range(IMGSIZE)], dtype=np.float32),\
-    shape=[IMGSIZE,IMGSIZE,2])
+Pixels = tf.constant(np.array([(x, y) for x in range(IMGSIZE) for y in range(IMGSIZE)], dtype=np.float32),
+                     shape=[IMGSIZE, IMGSIZE, 2])
 
 
 def TransformParamsLayer(SrcShapes, DstShape):
@@ -36,16 +36,21 @@ def TransformParamsLayer(SrcShapes, DstShape):
         a = tf.tensordot(srcVec, destVec, 1) / norm
         b = 0
 
-        srcX = tf.reshape(srcVec, (-1,2))[:,0]
-        srcY = tf.reshape(srcVec, (-1,2))[:,1]
-        destX = tf.reshape(destVec, (-1,2))[:,0]
-        destY = tf.reshape(destVec, (-1,2))[:,1]
+        srcX = tf.reshape(srcVec, (-1, 2))[:, 0]
+        srcY = tf.reshape(srcVec, (-1, 2))[:, 1]
+        destX = tf.reshape(destVec, (-1, 2))[:, 0]
+        destY = tf.reshape(destVec, (-1, 2))[:, 1]
 
-        b = tf.reduce_sum(tf.multiply(srcX, destY) - tf.multiply(srcY, destX))
+        b = tf.reduce_sum(
+            tf.multiply(
+                srcX,
+                destY) -
+            tf.multiply(
+                srcY,
+                destX))
         b = b / norm
 
-    
-        A = tf.reshape(tf.stack([a, b, -b, a]), (2,2))
+        A = tf.reshape(tf.stack([a, b, -b, a]), (2, 2))
         srcMean = tf.tensordot(srcMean, A, 1)
 
         return tf.concat((tf.reshape(A, (-1,)), destMean - srcMean), 0)
@@ -72,7 +77,8 @@ def AffineTransformLayer(Image, Param):
     def affine_transform(I, A, T):
         I = tf.reshape(I, [IMGSIZE, IMGSIZE])
 
-        SrcPixels = tf.matmul(tf.reshape(Pixels, [IMGSIZE * IMGSIZE,2]), A) + T
+        SrcPixels = tf.matmul(tf.reshape(
+            Pixels, [IMGSIZE * IMGSIZE, 2]), A) + T
         SrcPixels = tf.clip_by_value(SrcPixels, 0, IMGSIZE - 2)
 
         outPixelsMinMin = tf.to_float(tf.to_int32(SrcPixels))
@@ -80,17 +86,23 @@ def AffineTransformLayer(Image, Param):
         dx = dxdy[:, 0]
         dy = dxdy[:, 1]
 
-        outPixelsMinMin = tf.reshape(tf.to_int32(outPixelsMinMin),[IMGSIZE * IMGSIZE, 2])
-        outPixelsMaxMin = tf.reshape(outPixelsMinMin + [1, 0], [IMGSIZE * IMGSIZE, 2])
-        outPixelsMinMax = tf.reshape(outPixelsMinMin + [0, 1], [IMGSIZE * IMGSIZE, 2])
-        outPixelsMaxMax = tf.reshape(outPixelsMinMin + [1, 1], [IMGSIZE * IMGSIZE, 2])
+        outPixelsMinMin = tf.reshape(tf.to_int32(
+            outPixelsMinMin), [IMGSIZE * IMGSIZE, 2])
+        outPixelsMaxMin = tf.reshape(
+            outPixelsMinMin + [1, 0], [IMGSIZE * IMGSIZE, 2])
+        outPixelsMinMax = tf.reshape(
+            outPixelsMinMin + [0, 1], [IMGSIZE * IMGSIZE, 2])
+        outPixelsMaxMax = tf.reshape(
+            outPixelsMinMin + [1, 1], [IMGSIZE * IMGSIZE, 2])
 
         OutImage = (1 - dx) * (1 - dy) * tf.gather_nd(I, outPixelsMinMin) + dx * (1 - dy) * tf.gather_nd(I, outPixelsMaxMin) \
-                   + (1 - dx) * dy * tf.gather_nd(I, outPixelsMinMax) + dx * dy * tf.gather_nd(I, outPixelsMaxMax)
+            + (1 - dx) * dy * tf.gather_nd(I, outPixelsMinMax) + \
+            dx * dy * tf.gather_nd(I, outPixelsMaxMax)
 
-        return tf.reshape(OutImage,[IMGSIZE,IMGSIZE,1])
+        return tf.reshape(OutImage, [IMGSIZE, IMGSIZE, 1])
 
-    return tf.map_fn(lambda args: affine_transform(args[0], args[1], args[2]),(Image, A, T), dtype=tf.float32)
+    return tf.map_fn(lambda args: affine_transform(
+        args[0], args[1], args[2]), (Image, A, T), dtype=tf.float32)
 
 
 def LandmarkTransformLayer(Landmark, Param, Inverse=False):
@@ -113,12 +125,12 @@ def LandmarkTransformLayer(Landmark, Param, Inverse=False):
 
 HalfSize = 8
 
-Offsets = tf.constant(np.array(list(itertools.product(range(-HalfSize, HalfSize), \
-    range(-HalfSize, HalfSize))), dtype=np.int32), shape=(16, 16, 2))
+Offsets = tf.constant(np.array(list(itertools.product(range(-HalfSize, HalfSize),
+                                                      range(-HalfSize, HalfSize))), dtype=np.int32), shape=(16, 16, 2))
 
 
 def LandmarkImageLayer(Landmarks):
-    
+
     def draw_landmarks(L):
         def draw_landmarks_helper(Point):
             intLandmark = tf.to_int32(Point)
@@ -128,23 +140,26 @@ def LandmarkImageLayer(Landmarks):
             vals = 1 / (1 + tf.norm(offsetsSubPix, axis=2))
             img = tf.scatter_nd(locations, vals, shape=(IMGSIZE, IMGSIZE))
             return img
-        Landmark = tf.reverse(tf.reshape(L, [-1,2]), [-1])
+        Landmark = tf.reverse(tf.reshape(L, [-1, 2]), [-1])
         # Landmark = tf.reshape(L, (-1, 2))
-        Landmark = tf.clip_by_value(Landmark, HalfSize, IMGSIZE - 1 - HalfSize)
+        Landmark = tf.clip_by_value(
+            Landmark, HalfSize, IMGSIZE - 1 - HalfSize)
         # Ret = 1 / (tf.norm(tf.map_fn(DoIn,Landmarks),axis = 3) + 1)
         Ret = tf.map_fn(draw_landmarks_helper, Landmark)
         Ret = tf.reshape(tf.reduce_max(Ret, axis=0), [IMGSIZE, IMGSIZE, 1])
         return Ret
     return tf.map_fn(draw_landmarks, Landmarks)
 
+
 def GetHeatMap(Landmark):
-    
+
     def Do(L):
         def DoIn(Point):
             return Pixels - Point
-        Landmarks = tf.reverse(tf.reshape(L,[-1,2]),[-1])
-        Landmarks = tf.clip_by_value(Landmarks,HalfSize,112 - 1 - HalfSize)
-        Ret = 1 / (tf.norm(tf.map_fn(DoIn,Landmarks),axis = 3) + 1)
-        Ret = tf.reshape(tf.reduce_max(Ret,0),[IMGSIZE,IMGSIZE,1])
+        Landmarks = tf.reverse(tf.reshape(L, [-1, 2]), [-1])
+        Landmarks = tf.clip_by_value(
+            Landmarks, HalfSize, 112 - 1 - HalfSize)
+        Ret = 1 / (tf.norm(tf.map_fn(DoIn, Landmarks), axis=3) + 1)
+        Ret = tf.reshape(tf.reduce_max(Ret, 0), [IMGSIZE, IMGSIZE, 1])
         return Ret
-    return tf.map_fn(Do,Landmark)
+    return tf.map_fn(Do, Landmark)
