@@ -27,27 +27,27 @@ def augment(images, labels, labels_em):
 
 def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7, lr_stage1=0.001, lr_stage2=0.001, n_landmark=68, IMGSIZE=224):
 
-    x = tf.placeholder(tf.float32,[None, IMGSIZE,IMGSIZE,1])
-    y = tf.placeholder(tf.float32,[None, n_landmark * 2])
-    z = tf.placeholder(tf.int32, [None, ])
+    InputImage = tf.placeholder(tf.float32,[None, IMGSIZE,IMGSIZE,1])
+    GroundTruth = tf.placeholder(tf.float32,[None, n_landmark * 2])
+    Emotion_Labels = tf.placeholder(tf.int32, [None, ])
     
-    # dataset = tf.data.Dataset.from_tensor_slices((x, y, z)).batch(batch_size).repeat()
-    dataset = tf.data.Dataset.from_tensor_slices((x, y, z)).batch(batch_size)
-    iter_ = dataset.make_initializable_iterator()
-    InputImage, GroundTruth, Emotion_Labels = iter_.get_next()
+   
+    # dataset = tf.data.Dataset.from_tensor_slices((x, y, z)).batch(batch_size)
+    # iter_ = dataset.make_initializable_iterator()
+    # InputImage, GroundTruth, Emotion_Labels = iter_.get_next()
     
     MeanShape = tf.constant(MeanShapeNumpy, dtype=tf.float32)
     S1_isTrain = tf.placeholder(tf.bool)
     S2_isTrain = tf.placeholder(tf.bool)
     global_step = tf.Variable(0, trainable=False)
     Ret_dict = {}
-    # Ret_dict['InputImage'] = InputImage
-    # Ret_dict['GroundTruth'] = GroundTruth
-    # Ret_dict['Emotion_labels'] = Emotion_Labels
-    Ret_dict['x'] = x
-    Ret_dict['y'] = y
-    Ret_dict['z'] = z
-    Ret_dict['iterator'] = iter_
+    Ret_dict['InputImage'] = InputImage
+    Ret_dict['GroundTruth'] = GroundTruth
+    Ret_dict['Emotion_labels'] = Emotion_Labels
+    # Ret_dict['x'] = x
+    # Ret_dict['y'] = y
+    # Ret_dict['z'] = z
+
     
     Ret_dict['S1_isTrain'] = S1_isTrain
     Ret_dict['S2_isTrain'] = S2_isTrain
@@ -141,12 +141,9 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7, lr_stage1=0.001, lr_stage2
 
         S2_Fc1 = tf.layers.batch_normalization(tf.layers.dense(S2_DropOut,256,\
             activation=tf.nn.relu,kernel_initializer=tf.glorot_uniform_initializer()),training=S2_isTrain)
+        S2_Fc2 = tf.layers.dense(S2_Fc1, n_landmark * 2)
         
-        S2_DropOut2 = tf.layers.dropout(S2_Fc1,0.5,training=S2_isTrain)
-        
-        S2_Fc2 = tf.layers.dense(S2_DropOut2,n_landmark * 2)
-        S2_Emotion = tf.layers.dense(S2_DropOut2, nb_emotions)
-        
+        S2_Emotion = tf.layers.dense(S2_Fc1, nb_emotions)
         Pred_Emotion = tf.nn.softmax(S2_Emotion)
         S2_Pred_Emotion = tf.argmax(input=Pred_Emotion, axis=1)
         
@@ -154,7 +151,7 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7, lr_stage1=0.001, lr_stage2
         emotion_accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
         S2_Ret = LandmarkTransformLayer(S2_Fc2 + S2_InputLandmark,S2_AffineParam, Inverse=True)
-        S2_Cost_landm = tf.reduce_mean(NormRmse(GroundTruth,S2_Ret)) # cost for landmarks
+        S2_Cost_landm = tf.reduce_mean(NormRmse(GroundTruth, S2_Ret)) # cost for landmarks
         
         one_hot_labels = tf.one_hot(indices=tf.cast(Emotion_Labels, tf.int32), depth=nb_emotions)
         print_output = tf.Print(S2_Pred_Emotion, [Pred_Emotion, Emotion_Labels, S2_Pred_Emotion], summarize=100000)
@@ -182,6 +179,14 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7, lr_stage1=0.001, lr_stage2
     Ret_dict['S2_InputLandmark'] = S2_InputLandmark
     Ret_dict['S2_InputHeatmap'] = S2_InputHeatmap
     Ret_dict['S2_FeatureUpScale'] = S2_FeatureUpScale
+    
+    Ret_dict['S2_Conv4b'] = S2_Conv4b
+    Ret_dict['S2_Conv4a'] = S2_Conv4a
+    Ret_dict['S2_Conv3a'] = S2_Conv3a
+    Ret_dict['S2_Conv3b'] = S2_Conv3b
+    
+    
+    Ret_dict['S2_Emotion'] = S2_Emotion
     
     Ret_dict['lr'] = learning_rate
     
