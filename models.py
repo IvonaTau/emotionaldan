@@ -343,6 +343,7 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7,
     Ret_dict['S2_Conv3b'] = S2_Conv3b
 
     Ret_dict['S2_Emotion'] = S2_Emotion
+    Ret_dict['softmax'] = Pred_Emotion
 
     Ret_dict['lr'] = learning_rate
 

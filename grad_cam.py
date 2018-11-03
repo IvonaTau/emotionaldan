@@ -30,16 +30,21 @@ def get_gradcam(batch_img, batch_label, modelPath, dan, tf_sess,
     target_conv_layer_grad = tf.gradients(y_c, target_conv_layer)[0]
 
     # Run inference of prediction class
-    prob = tf_sess.run([dan['Pred_emotion']],
+    prob, softmax = tf_sess.run([dan['Pred_emotion'], dan['softmax']],
                        {dan['InputImage']: batch_img,
                         dan['S1_isTrain']: False,
                         dan['S2_isTrain']: False})
     if logging:
-        print('Predicted emotion:', emotionDict7[prob[0][0]])
+        # print(prob)
+        # print(softmax)
+        print('Predicted emotion:', emotionDict7[prob[0]])
         print('True emotion', emotionDict7[batch_label[0]])
+        for i in range(len(softmax[0])):
+            print(emotionDict7[i], softmax[0][i])
+        
 
     # Do not generate cam if predicted class is not correct
-    if prob[0][0] != batch_label[0]:
+    if prob[0] != batch_label[0]:
         return []
 
     target_conv_layer_value, target_conv_layer_grad_value = tf_sess.run(

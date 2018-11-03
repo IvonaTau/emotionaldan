@@ -31,6 +31,25 @@ def find_closest(matrix_list, target_matrix):
     return closest_matrix, closest_id
 
 
+def range_to_landmark_nb(landmark_list, landmark_dict):
+    landmark_numbers = []
+    for x,y in zip(landmark_list[0:][::2], landmark_list[1:][::2]):
+        landmark_numbers.append(landmark_dict[int(x),int(y)])
+    return landmark_numbers
+
+
+def get_landmark_nb_dict(all_landmarks):
+    xy_to_landmark = {}
+
+    x_s = all_landmarks[0:][::2]
+    y_s = all_landmarks[1:][::2]
+    i_s = range(len(x_s))
+
+    for i, x, y in zip(i_s, x_s, y_s):
+        xy_to_landmark[int(x),int(y)] = i
+        
+    return xy_to_landmark
+
 def loadFromPts(filename):
     landmarks = np.genfromtxt(filename, skip_header=3, skip_footer=1)
     landmarks = landmarks - 1
