@@ -11,11 +11,18 @@ To run the code you need:
 * Tensorflow 1.8 or newer
 * OpenCV 3.1.0 or newer
 
+Some parts of the code use the following Tensorflow implementation of DAN:
+https://github.com/mariolew/Deep-Alignment-Network-tensorflow
+
 
 ### Citation 
 
 If you use this software in your research, then please cite one of the following papers:
 
-I. Tautkute and T.Trzcinski : Classifying and Visualizing Emotions with Emotional DAN
+I. Tautkute and T. Trzcinski : Classifying and Visualizing Emotions with Emotional DAN
 
 I. Tautkute and T. Trzcinski and A. Bielski: I Know How You Feel: Emotion Recognition with Facial Landmarks, CVPRW 2018
+
+### Contact
+
+If you have any questions or suggestions feel free to contact me at s16352@pjwstk.edu.pl.
