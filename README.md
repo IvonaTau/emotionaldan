@@ -4,7 +4,7 @@ This repository contains code supporting publication `Classifying and Visualizin
 
 We propose a new approach to solve emotion recognition task that relies on incorporating facial landmarks as a part of the classification loss function. To that end, we extend a recently proposed Deep Alignment Network (https://github.com/MarekKowalski/DeepAlignmentNetwork) with a term related to facial features. Thanks to this simple modification, our model called EmotionalDAN is able to outperform state-of-the-art emotion classification methods on two challenging benchmark dataset by up to 5%. Furthermore, we visualize image regions analyzed by the network when making a decision and the results indicate that our EmotionalDAN model is able to correctly identify facial landmarks responsible for expressing the emotions.
 
-![](graphics/mean_gradcams_header.png)
+![](graphics/mean_gradcams_2.png)
 
 ### Requirements
 
