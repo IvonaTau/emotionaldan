@@ -6,7 +6,7 @@ We propose a new approach to solve emotion recognition task that relies on incor
 
 ![](graphics/mean_gradcams_2.png)
 
-### Requirements
+## Requirements
 
 To run the code you need:
 
@@ -16,8 +16,18 @@ To run the code you need:
 Some parts of the code use the following Tensorflow implementation of DAN:
 https://github.com/mariolew/Deep-Alignment-Network-tensorflow
 
+## Data preparation
 
-### Citation 
+To read the training data run:
+
+```ReadList('train.txt', 'Trainset', isTrainSet=True)```, where `train.txt` is in the following format:
+```path_to_jpg_image class_label``` 
+
+
+## Visualizations
+
+
+## Citation 
 
 If you use this software in your research, then please cite one of the following papers:
 
@@ -25,6 +35,6 @@ I. Tautkute and T. Trzcinski : Classifying and Visualizing Emotions with Emotion
 
 I. Tautkute and T. Trzcinski and A. Bielski: I Know How You Feel: Emotion Recognition with Facial Landmarks, CVPRW 2018
 
-### Contact
+## Contact
 
 If you have any questions or suggestions feel free to contact me at s16352@pjwstk.edu.pl.
