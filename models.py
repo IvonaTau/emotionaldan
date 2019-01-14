@@ -156,7 +156,7 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7,
         S1_Fc2 = tf.layers.dense(S1_Fc1, n_landmark * 2)
 
         S1_Ret = S1_Fc2 + MeanShape
-        S1_Cost = tf.reduce_mean(NormRmse(GroundTruth, S1_Ret))
+        S1_Cost = tf.reduce_mean(NormRmse(GroundTruth, S1_Ret, n_landmark=n_landmark))
 
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS, 'Stage1')):
             S1_Optimizer = tf.train.AdamOptimizer(lr_stage1).minimize(
@@ -171,7 +171,7 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7,
 
         S2_AffineParam = TransformParamsLayer(S1_Ret, MeanShape)
         S2_InputImage = AffineTransformLayer(InputImage, S2_AffineParam)
-        S2_InputLandmark = LandmarkTransformLayer(S1_Ret, S2_AffineParam)
+        S2_InputLandmark = LandmarkTransformLayer(S1_Ret, S2_AffineParam, nb_landmarks=n_landmark)
         S2_InputHeatmap = LandmarkImageLayer(S2_InputLandmark)
 
         S2_Feature = tf.reshape(tf.layers.dense(S1_Fc1,
@@ -298,9 +298,9 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7,
             tf.cast(correct_prediction, tf.float32))
 
         S2_Ret = LandmarkTransformLayer(
-            S2_Fc2 + S2_InputLandmark, S2_AffineParam, Inverse=True)
+            S2_Fc2 + S2_InputLandmark, S2_AffineParam, Inverse=True, nb_landmarks=n_landmark)
         S2_Cost_landm = tf.reduce_mean(
-            NormRmse(GroundTruth, S2_Ret))  # cost for landmarks
+            NormRmse(GroundTruth, S2_Ret, n_landmark=n_landmark))  # cost for landmarks
 
         one_hot_labels = tf.one_hot(indices=tf.cast(
             Emotion_Labels, tf.int32), depth=nb_emotions)

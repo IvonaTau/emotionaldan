@@ -1,6 +1,9 @@
 """
+Trying to make data loading more efficient.
+
 !python3.6 train.py "/home/workspace/itautkute/emoDAN-tensorflow/" --trainSetFile="AffectnetVal_7.npz" 2
-!CUDA_VISIBLE_DEVICES=1 python3.6 train.py "/home/workspace/itautkute/emotionaldan/data/"   2
+!CUDA_VISIBLE_DEVICES=1 python3.6 train.py "/home/itautkute/emotionaldan/data/"   2
+
 """
 
 import argparse
@@ -29,6 +32,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', default=40)
     parser.add_argument('--pretrainedModel', default='./Model0/Model')
     parser.add_argument('--outPath', default='./Model2/Model2')
+    
 
     args = parser.parse_args()
 

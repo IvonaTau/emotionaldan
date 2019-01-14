@@ -105,7 +105,7 @@ def AffineTransformLayer(Image, Param):
         args[0], args[1], args[2]), (Image, A, T), dtype=tf.float32)
 
 
-def LandmarkTransformLayer(Landmark, Param, Inverse=False):
+def LandmarkTransformLayer(Landmark, Param, Inverse=False, nb_landmarks=N_LANDMARK):
     '''
     Landmark: [N, N_LANDMARK x 2]
     Param: [N, 6]
@@ -115,12 +115,12 @@ def LandmarkTransformLayer(Landmark, Param, Inverse=False):
     A = tf.reshape(Param[:, 0:4], [-1, 2, 2])
     T = tf.reshape(Param[:, 4:6], [-1, 1, 2])
 
-    Landmark = tf.reshape(Landmark, [-1, N_LANDMARK, 2])
+    Landmark = tf.reshape(Landmark, [-1, nb_landmarks, 2])
     if Inverse:
         A = tf.matrix_inverse(A)
         T = tf.matmul(-T, A)
 
-    return tf.reshape(tf.matmul(Landmark, A) + T, [-1, N_LANDMARK * 2])
+    return tf.reshape(tf.matmul(Landmark, A) + T, [-1, nb_landmarks * 2])
 
 
 HalfSize = 8
