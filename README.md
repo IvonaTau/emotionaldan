@@ -18,7 +18,7 @@ https://github.com/mariolew/Deep-Alignment-Network-tensorflow
 
 ## Data preparation
 
-To read the training data run:
+To read the training data run the function from `DataSetPre.py` file:
 
 ```ReadList('train.txt', 'Trainset', isTrainSet=True)```, where `train.txt` is in the following format:
 ```path_to_jpg_image class_label``` 

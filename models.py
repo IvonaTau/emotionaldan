@@ -9,9 +9,35 @@ def NormRmse(GroudTruth, Prediction, n_landmark=68):
     Pt = tf.reshape(Prediction, [-1, n_landmark, 2])
     loss = tf.reduce_mean(
         tf.sqrt(tf.reduce_sum(tf.squared_difference(Gt, Pt), 2)), 1)
-    norm = tf.norm(tf.reduce_mean(
-        Gt[:, 36:42, :], 1) - tf.reduce_mean(Gt[:, 42:48, :], 1), axis=1)
+    if n_landmark == 68:
+        eyes_distance = tf.reduce_mean(Gt[:, 36:42, :], 1) - tf.reduce_mean(Gt[:, 42:48, :], 1)
+    elif n_landmark == 51:
+        eyes_distance = tf.reduce_mean(Gt[:, 19:25, :], 1) - tf.reduce_mean(Gt[:, 25:31, :], 1)
+    elif n_landmark == 32:
+        eyes_distance = tf.reduce_mean(Gt[:, 0:6, :], 1) - tf.reduce_mean(Gt[:, 6:12, :], 1)
+    elif n_landmark == 42:
+        eyes_distance = tf.reduce_mean(Gt[:, 10:16, :], 1) - tf.reduce_mean(Gt[:, 16:22, :], 1)
+    norm = tf.norm(eyes_distance, axis=1)
     return loss / norm
+
+
+# Numpy version
+# def NormRmse(GroudTruth, Prediction, n_landmark=68):
+#     Gt = np.reshape(GroudTruth, [-1, n_landmark, 2])
+#     Pt = np.reshape(Prediction, [-1, n_landmark, 2])
+#     loss = np.mean(
+#         np.sqrt(np.sum(np.square(Gt- Pt), 2)), 1)
+#     if n_landmark == 68:
+#         eyes_distance = np.mean(Gt[:, 36:42, :], 1) - np.mean(Gt[:, 42:48, :], 1)
+#     elif n_landmark == 51:
+#         eyes_distance = np.mean(Gt[:, 19:25, :], 1) - np.mean(Gt[:, 25:31, :], 1)
+#     elif n_landmark == 32:
+#         eyes_distance = np.mean(Gt[:, 0:6, :], 1) - np.mean(Gt[:, 6:12, :], 1)
+#     elif n_landmark == 42:
+#         eyes_distance = np.mean(Gt[:, 10:16, :], 1) - np.mean(Gt[:, 16:22, :], 1)
+#     norm = np.linalg.norm(eyes_distance, axis=1)
+#     return loss / norm
+
 
 
 def augment(images, labels, labels_em):
@@ -44,12 +70,17 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7,
     # Ret_dict['x'] = x
     # Ret_dict['y'] = y
     # Ret_dict['z'] = z
-
+    
+    InputImage, GroundTruth, Emotion_Labels = tf.cond(S1_isTrain, 
+            lambda: augment(InputImage, GroundTruth, Emotion_Labels),
+            lambda: (InputImage, GroundTruth, Emotion_Labels))
+    
+    InputImage, GroundTruth, Emotion_Labels = tf.cond(S2_isTrain, 
+            lambda: augment(InputImage, GroundTruth, Emotion_Labels),
+            lambda: (InputImage, GroundTruth, Emotion_Labels))
+    
     Ret_dict['S1_isTrain'] = S1_isTrain
     Ret_dict['S2_isTrain'] = S2_isTrain
-
-    InputImage, GroundTruth, Emotion_Labels = augment(
-        InputImage, GroundTruth, Emotion_Labels)
 
     with tf.variable_scope('Stage1'):
 
@@ -323,7 +354,8 @@ def emoDAN(MeanShapeNumpy, batch_size, nb_emotions=7,
                     tf.GraphKeys.TRAINABLE_VARIABLES,
                     "Stage2"),
                 global_step=global_step)
-
+    
+    Ret_dict['S2_Fc2'] = S2_Fc2
     Ret_dict['S2_Ret'] = S2_Ret
     Ret_dict['S2_Cost'] = S2_Cost_landm
     Ret_dict['S2_Optimizer'] = S2_Optimizer

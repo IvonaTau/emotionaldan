@@ -38,6 +38,27 @@ def range_to_landmark_nb(landmark_list, landmark_dict):
     return landmark_numbers
 
 
+def filter_landmarks(landmarks, mode='all'):
+    if mode == 'all':
+        return landmarks
+    elif mode == 'no_outline':
+        nb_to_remove = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+    elif mode == 'eyes_mouth':
+        nb_to_remove = list(range(0,36)) 
+    else:
+        raise ValueError('Wrong method to filter landmarks!')
+    indices_to_remove = [landmark_to_index(a) for a in nb_to_remove]
+    indices_flattened = [v for s in indices_to_remove for v in s]
+    return np.delete(landmarks, indices_flattened)
+
+
+def landmark_to_index(lnd_nb):
+    # 0 -> 0,1
+    # 1 -> 2,3
+    # 2 -> 4,5
+    return [lnd_nb*2, lnd_nb*2+1]
+
+
 def get_landmark_nb_dict(all_landmarks):
     xy_to_landmark = {}
 
